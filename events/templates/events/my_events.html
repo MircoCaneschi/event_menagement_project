@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}My Events{% endblock %}
+{% block content %}
+  <h2>My Registered Events</h2>
+  <ul>
+    {% for reg in registrations %}
+      <li class="event">
+        <strong>{{ reg.event.title }}</strong><br>
+        {{ reg.event.description }}<br>
+        Date: {{ reg.event.date }}<br>
+        <a href="{% url 'event_unregister' reg.event.pk %}">Leave</a>
+      </li>
+    {% empty %}
+      <li>You haven't joined any events yet.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

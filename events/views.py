@@ -1,0 +1,102 @@
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Event, Registration
+from django.http import HttpResponseForbidden
+from django.contrib.auth.decorators import login_required
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, UpdateView, DeleteView
+from .forms import EventForm
+
+def event_list(request):
+    events = Event.objects.all().order_by('date')
+    joined_event_ids = []
+
+    # Se l'utente è loggato ed è un attendee
+    if request.user.is_authenticated and request.user.is_attendee:
+        # Prendiamo gli ID degli eventi a cui è iscritto
+        joined_event_ids = Registration.objects.filter(attendee=request.user).values_list('event_id', flat=True)
+
+    return render(request, 'events/event_list.html', {
+        'events': events,
+        'joined_event_ids': joined_event_ids
+    })
+
+
+@login_required
+def organizer_dashboard(request):
+    if not request.user.is_organizer:
+        return HttpResponseForbidden("Non sei autorizzato a vedere questa pagina.")
+
+    events = Event.objects.filter(organizer=request.user).order_by('date')
+    return render(request, 'events/organizer_dashboard.html', {'events': events})
+
+
+#CRUD views for Event model
+class EventCreateView(CreateView):
+    model = Event
+    form_class = EventForm
+    template_name = 'events/event_form.html'
+
+    def form_valid(self, form):
+        form.instance.organizer = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('organizer_dashboard')
+
+
+class EventUpdateView(UpdateView):
+    model = Event
+    form_class = EventForm
+    template_name = 'events/event_form.html'
+
+    def get_queryset(self):
+        return Event.objects.filter(organizer=self.request.user)
+
+    def get_success_url(self):
+        return reverse_lazy('organizer_dashboard')
+
+
+class EventDeleteView(DeleteView):
+    model = Event
+    template_name = 'events/event_confirm_delete.html'
+
+    def get_queryset(self):
+        return Event.objects.filter(organizer=self.request.user)
+
+    def get_success_url(self):
+        return reverse_lazy('organizer_dashboard')
+
+
+
+@login_required
+def register_to_event(request, pk):
+    if not request.user.is_attendee:
+        return HttpResponseForbidden("Only attendees can register to events.")
+
+    event = get_object_or_404(Event, pk=pk)
+
+    # Check if already registered
+    already_registered = Registration.objects.filter(event=event, attendee=request.user).exists()
+    if not already_registered:
+        Registration.objects.create(event=event, attendee=request.user)
+
+    return redirect('event_list')
+
+@login_required
+def my_events(request):
+    if not request.user.is_attendee:
+        return HttpResponseForbidden("Only attendees can view their events.")
+
+    registrations = Registration.objects.filter(attendee=request.user).select_related('event')
+    return render(request, 'events/my_events.html', {'registrations': registrations})
+
+@login_required
+def unregister_from_event(request, pk):
+    if not request.user.is_attendee:
+        return HttpResponseForbidden("Only attendees can unregister.")
+
+    registration = Registration.objects.filter(event_id=pk, attendee=request.user).first()
+    if registration:
+        registration.delete()
+
+    return redirect('event_list')

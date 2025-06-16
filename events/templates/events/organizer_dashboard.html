@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Organizer Dashboard{% endblock %}
+{% block content %}
+  <h2>Your Events</h2>
+  <a href="{% url 'event_create' %}">+ Create New Event</a>
+  <ul>
+    {% for event in events %}
+      <li class="event">
+        <strong>{{ event.title }}</strong><br>
+        {{ event.description }}<br>
+        Date: {{ event.date }}<br>
+        <a href="{% url 'event_edit' event.pk %}">Edit</a> |
+        <a href="{% url 'event_delete' event.pk %}">Delete</a>
+      </li>
+    {% empty %}
+      <li>You haven't created any events yet.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
