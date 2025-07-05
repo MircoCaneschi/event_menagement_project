@@ -1,23 +1,27 @@
 {% extends 'base.html' %}
 {% block title %}Available Events{% endblock %}
 {% block content %}
-  <h2>Available Events</h2>
-  <ul>
-    {% for event in events %}
-      <li class="event">
-        <strong>{{ event.title }}</strong><br>
-        {{ event.description }}<br>
-        Date: {{ event.date }}<br>
-        Organizer: {{ event.organizer.username }}<br>
+    <h2>Available Events</h2>
+    <ul>
+        {% for event in events %}
+            <li class="event">
+                <strong>{{ event.title }}</strong><br>
+                {{ event.description }}<br>
+                Date: {{ event.date }}<br>
+                Organizer: {{ event.organizer.username }}<br>
+                <strong>Registrations:</strong> {{ event.registration_count }}<br>
 
-        {% if user.is_authenticated and user.is_attendee %}
-          {% if event.id in joined_event_ids %}
-            <a href="{% url 'event_unregister' event.pk %}">Leave</a>
-          {% else %}
-            <a href="{% url 'event_register' event.pk %}">Join</a>
-          {% endif %}
-        {% endif %}
-      </li>
-    {% endfor %}
-  </ul>
+
+                {% if user.is_authenticated %}
+                    {% if user.is_attendee or user.is_organizer %}
+                        {% if event.id in joined_event_ids %}
+                            <a href="{% url 'event_unregister' event.pk %}">Leave</a>
+                        {% else %}
+                            <a href="{% url 'event_register' event.pk %}">Join</a>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
 {% endblock %}

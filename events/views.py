@@ -1,3 +1,4 @@
+from django.db.models import Count
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Event, Registration
 from django.http import HttpResponseForbidden
@@ -6,13 +7,12 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DeleteView
 from .forms import EventForm
 
+
 def event_list(request):
-    events = Event.objects.all().order_by('date')
+    events = Event.objects.all().annotate(registration_count=Count('registrations')).order_by('date')
     joined_event_ids = []
 
-    # Se l'utente è loggato ed è un attendee
-    if request.user.is_authenticated and request.user.is_attendee:
-        # Prendiamo gli ID degli eventi a cui è iscritto
+    if request.user.is_authenticated and (request.user.is_attendee or request.user.is_organizer):
         joined_event_ids = Registration.objects.filter(attendee=request.user).values_list('event_id', flat=True)
 
     return render(request, 'events/event_list.html', {
@@ -26,11 +26,13 @@ def organizer_dashboard(request):
     if not request.user.is_organizer:
         return HttpResponseForbidden("Non sei autorizzato a vedere questa pagina.")
 
-    events = Event.objects.filter(organizer=request.user).order_by('date')
+    events = Event.objects.filter(organizer=request.user) \
+        .annotate(registration_count=Count('registrations')) \
+        .order_by('date')
     return render(request, 'events/organizer_dashboard.html', {'events': events})
 
 
-#CRUD views for Event model
+# CRUD views for Event model
 class EventCreateView(CreateView):
     model = Event
     form_class = EventForm
@@ -67,11 +69,10 @@ class EventDeleteView(DeleteView):
         return reverse_lazy('organizer_dashboard')
 
 
-
 @login_required
 def register_to_event(request, pk):
-    if not request.user.is_attendee:
-        return HttpResponseForbidden("Only attendees can register to events.")
+    if not (request.user.is_attendee or request.user.is_organizer):
+        return HttpResponseForbidden("Only authenticated users can register to events.")
 
     event = get_object_or_404(Event, pk=pk)
 
@@ -82,17 +83,19 @@ def register_to_event(request, pk):
 
     return redirect('event_list')
 
+
 @login_required
 def my_events(request):
-    if not request.user.is_attendee:
+    if not request.user.is_attendee and not request.user.is_organizer:
         return HttpResponseForbidden("Only attendees can view their events.")
 
     registrations = Registration.objects.filter(attendee=request.user).select_related('event')
     return render(request, 'events/my_events.html', {'registrations': registrations})
 
+
 @login_required
 def unregister_from_event(request, pk):
-    if not request.user.is_attendee:
+    if not (request.user.is_attendee or request.user.is_organizer):
         return HttpResponseForbidden("Only attendees can unregister.")
 
     registration = Registration.objects.filter(event_id=pk, attendee=request.user).first()
