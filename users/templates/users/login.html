@@ -7,4 +7,9 @@
     {{ form.as_p }}
     <button type="submit">Login</button>
   </form>
+    <p>Don't have an account?</p>
+<ul>
+  <li><a href="{% url 'register_attendee' %}">Register as Attendee</a></li>
+  <li><a href="{% url 'register_organizer' %}">Register as Organizer</a></li>
+</ul>
 {% endblock %}

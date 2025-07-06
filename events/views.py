@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DeleteView
 from .forms import EventForm
+from django.contrib import messages
 
 
 def event_list(request):
@@ -40,6 +41,7 @@ class EventCreateView(CreateView):
 
     def form_valid(self, form):
         form.instance.organizer = self.request.user
+        messages.success(self.request, "Event created successfully.")
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -52,6 +54,7 @@ class EventUpdateView(UpdateView):
     template_name = 'events/event_form.html'
 
     def get_queryset(self):
+        messages.success(self.request, "Event updated successfully.")
         return Event.objects.filter(organizer=self.request.user)
 
     def get_success_url(self):
@@ -72,14 +75,16 @@ class EventDeleteView(DeleteView):
 @login_required
 def register_to_event(request, pk):
     if not (request.user.is_attendee or request.user.is_organizer):
-        return HttpResponseForbidden("Only authenticated users can register to events.")
+        return HttpResponseForbidden("Only authenticated users can register.")
 
     event = get_object_or_404(Event, pk=pk)
-
-    # Check if already registered
     already_registered = Registration.objects.filter(event=event, attendee=request.user).exists()
-    if not already_registered:
+
+    if already_registered:
+        messages.warning(request, "You are already registered for this event.")
+    else:
         Registration.objects.create(event=event, attendee=request.user)
+        messages.success(request, "You have successfully registered.")
 
     return redirect('event_list')
 
@@ -96,10 +101,13 @@ def my_events(request):
 @login_required
 def unregister_from_event(request, pk):
     if not (request.user.is_attendee or request.user.is_organizer):
-        return HttpResponseForbidden("Only attendees can unregister.")
+        return HttpResponseForbidden("Only authenticated users can unregister.")
 
     registration = Registration.objects.filter(event_id=pk, attendee=request.user).first()
     if registration:
         registration.delete()
+        messages.success(request, "You have successfully unregistered.")
+    else:
+        messages.warning(request, "You were not registered for this event.")
 
     return redirect('event_list')

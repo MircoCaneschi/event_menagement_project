@@ -54,11 +54,28 @@
                         </form>
                     {% endif %}
                 {% else %}
-                    <a href="{% url 'login' %}">Login</a>
+                    {% with request.resolver_match.url_name as current_view %}
+                        {% if current_view != 'register_attendee' and current_view != 'register_organizer' %}
+                            <a href="{% url 'login' %}">Login</a>
+                        {% endif %}
+                    {% endwith %}
                 {% endif %}
             {% endif %}
         {% endwith %}
     </nav>
+    {% if messages %}
+        <ul style="list-style: none; padding: 0;">
+            {% for message in messages %}
+                <li style="padding: 10px; background-color: #eee; border-left: 5px solid
+                        {% if message.tags == 'success' %}green
+                        {% elif message.tags == 'error' %}red
+                        {% elif message.tags == 'warning' %}orange
+                        {% else %}gray{% endif %}; margin-bottom: 10px;">
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 </header>
 
 {% block content %}{% endblock %}
