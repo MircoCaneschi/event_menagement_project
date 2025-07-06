@@ -15,7 +15,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.shortcuts import render
 from django.urls import path, include
+from django.conf.urls import handler404, handler500
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -23,3 +25,13 @@ urlpatterns = [
     path('events/', include('events.urls')),
 
 ]
+
+def custom_404_view(request, exception):
+    return render(request, '404.html', status=404)
+
+
+def custom_500_view(request):
+    return render(request, '500.html', status=500)
+
+handler404 = custom_404_view
+handler500 = custom_500_view

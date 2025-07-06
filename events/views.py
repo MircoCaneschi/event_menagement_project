@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.db.models import Count
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Event, Registration
@@ -25,7 +27,10 @@ def event_list(request):
 @login_required
 def organizer_dashboard(request):
     if not request.user.is_organizer:
-        return HttpResponseForbidden("Non sei autorizzato a vedere questa pagina.")
+        if settings.DEBUG:
+            return render(request, '403.html', status=403)
+        else:
+            raise PermissionDenied
 
     events = Event.objects.filter(organizer=request.user) \
         .annotate(registration_count=Count('registrations')) \
