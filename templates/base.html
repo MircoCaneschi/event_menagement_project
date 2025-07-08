@@ -34,34 +34,23 @@
 <header>
     <h1>Event Manager</h1>
     <nav>
-        {% with request.resolver_match.url_name as current_view %}
-            {% if current_view != 'login' %}
-                {% if user.is_authenticated %}
-                    {% if user.is_organizer %}
-                        <a href="{% url 'organizer_dashboard' %}">Dashboard</a>
-                        <a href="{% url 'event_list' %}">Events</a>
-                        <a href="{% url 'my_events' %}">My Events</a>
-                    {% elif user.is_attendee %}
-                        <a href="{% url 'event_list' %}">Events</a>
-                        <a href="{% url 'my_events' %}">My Events</a>
-                    {% endif %}
-                    {% if current_view != 'event_create' and current_view != 'event_edit' %}
-                        <form method="post" action="{% url 'logout' %}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" style="background:none; border:none; color:blue; cursor:pointer;">
-                                Logout
-                            </button>
-                        </form>
-                    {% endif %}
-                {% else %}
-                    {% with request.resolver_match.url_name as current_view %}
-                        {% if current_view != 'register_attendee' and current_view != 'register_organizer' %}
-                            <a href="{% url 'login' %}">Login</a>
-                        {% endif %}
-                    {% endwith %}
+        {% if request.resolver_match.url_name not in ['login', 'home', 'register_attendee', 'register_organizer'] %}
+            {% if user.is_authenticated %}
+                {% if user.is_organizer %}
+                    <a href="{% url 'organizer_dashboard' %}">Dashboard</a>
+                {% elif user.is_attendee %}
+                    <a href="{% url 'event_list' %}">Events</a>
+                    <a href="{% url 'my_events' %}">My Events</a>
                 {% endif %}
+
+                {% with request.resolver_match.url_name as current_view %}
+                    {% if current_view != 'event_create' and current_view != 'event_edit' %}
+                        <a href="{% url 'logout' %}">Logout</a>
+                        <a href="{% url 'home' %}">Home</a>
+                    {% endif %}
+                {% endwith %}
             {% endif %}
-        {% endwith %}
+        {% endif %}
     </nav>
     {% if messages %}
         <ul style="list-style: none; padding: 0;">
