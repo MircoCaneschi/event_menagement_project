@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to EventManager{% endblock %}
+
+{% block content %}
+  <div style="text-align: center; margin-top: 50px;">
+    <h1>EventManager</h1>
+    <p><small>created by MircoCaneschi</small></p>
+
+    <p style="margin-top: 20px;">
+      EventManager is a platform that allows users to browse, create and manage events.
+      Organizers can create and manage their own events, while attendees can register and view theirs.
+    </p>
+
+    <div style="margin-top: 30px;">
+      <a href="{% url 'login' %}" style="margin-right: 20px;">Login</a>
+      <a href="{% url 'register_attendee' %}">Register</a>
+    </div>
+  </div>
+{% endblock %}

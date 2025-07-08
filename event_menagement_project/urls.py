@@ -17,14 +17,17 @@ Including another URLconf
 from django.contrib import admin
 from django.shortcuts import render
 from django.urls import path, include
+from events.views import home
 from django.conf.urls import handler404, handler500
 
 urlpatterns = [
+    path('', home, name='home'),
     path('admin/', admin.site.urls),
     path('users/', include('users.urls')),
     path('events/', include('events.urls')),
 
 ]
+
 
 def custom_404_view(request, exception):
     return render(request, '404.html', status=404)
@@ -32,6 +35,7 @@ def custom_404_view(request, exception):
 
 def custom_500_view(request):
     return render(request, '500.html', status=500)
+
 
 handler404 = custom_404_view
 handler500 = custom_500_view

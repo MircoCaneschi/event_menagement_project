@@ -116,3 +116,8 @@ def unregister_from_event(request, pk):
         messages.warning(request, "You were not registered for this event.")
 
     return redirect('event_list')
+
+from django.shortcuts import render
+
+def home(request):
+    return render(request, 'home.html')
