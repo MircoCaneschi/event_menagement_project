@@ -32,9 +32,12 @@
 </head>
 <body>
 <header>
-    <h1>Event Manager</h1>
-    <nav>
-        {% with request.resolver_match.url_name as current_view %}
+    {% with request.resolver_match.url_name as current_view %}
+        {% if current_view != 'home' %}
+            <h1>Event Manager</h1>
+        {% endif %}
+        <nav>
+
             {% if current_view != 'login' %}
                 {% if user.is_authenticated %}
                     {% if user.is_organizer %}
@@ -55,14 +58,14 @@
                     {% endif %}
                 {% else %}
                     {% with request.resolver_match.url_name as current_view %}
-                        {% if current_view != 'register_attendee' and current_view != 'register_organizer' %}
+                        {% if current_view != 'register_attendee' and current_view != 'register_organizer' and current_view != 'home' %}
                             <a href="{% url 'login' %}">Login</a>
                         {% endif %}
                     {% endwith %}
                 {% endif %}
             {% endif %}
-        {% endwith %}
-    </nav>
+        </nav>
+    {% endwith %}
     {% if messages %}
         <ul style="list-style: none; padding: 0;">
             {% for message in messages %}
