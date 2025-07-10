@@ -3,11 +3,12 @@ services:
     name: event-manager
     env: python
     buildCommand: pip install -r requirements.txt
-startCommand: |
-  python manage.py migrate &&
-  echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'Passwordprova123')" | python manage.py shell &&
-  python manage.py collectstatic --noinput &&
-  gunicorn event_menagement_project.wsgi:application    envVars:
+    startCommand: |
+      python manage.py migrate &&
+      echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'Passwordprova123')" | python manage.py shell &&
+      python manage.py collectstatic --noinput &&
+      gunicorn event_menagement_project.wsgi:application
+    envVars:
       - key: DEBUG
         value: False
       - key: SECRET_KEY
