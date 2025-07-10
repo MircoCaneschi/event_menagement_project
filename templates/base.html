@@ -36,7 +36,7 @@
         {% if current_view != 'home' %}
             <h1>Event Manager</h1>
             <nav>
-                {% if current_view != 'login' %}
+                {% if current_view != 'login' and current_view != 'register_organizer' and current_view != 'register_attendee'%}
                     {% if user.is_authenticated %}
                         {% if user.is_organizer %}
                             <a href="{% url 'organizer_dashboard' %}">Dashboard</a>
@@ -62,6 +62,9 @@
                             {% endif %}
                         {% endwith %}
                     {% endif %}
+                {% endif %}
+                {% if current_view == 'register_attendee' and current_view == 'register_organizer' and current_view == 'login' %}
+                    <a href="{% url 'home' %}">Home</a>
                 {% endif %}
             </nav>
         {% endif %}

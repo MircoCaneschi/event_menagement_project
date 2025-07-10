@@ -16,4 +16,4 @@ services:
       - key: DJANGO_SETTINGS_MODULE
         value: event_menagement_project.settings
       - key: DATABASE_URL
-        value: postgresql://event_manager_db_5lic_user:O2WI01d3kBSqtRfw4ozI7HqgSX8wzKMc@dpg-d1npmejuibrs738b56jg-a/event_manager_db_5lic
+        value: postgresql://user:password@host/dbname

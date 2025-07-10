@@ -13,7 +13,7 @@ def register_organizer(request):
             user.is_attendee = False
             user.save()
             login(request, user)
-            return redirect('/dashboard/')
+            return redirect('organizer_dashboard')
     else:
         form = CustomUserRegistrationForm()
     return render(request, 'users/register.html', {'form': form, 'role': 'organizer'})
