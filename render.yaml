@@ -3,9 +3,16 @@ services:
     name: event-manager
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn event_menagement_project.wsgi:application
-    envVars:
+startCommand: |
+  python manage.py migrate &&
+  echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'Passwordprova123')" | python manage.py shell &&
+  python manage.py collectstatic --noinput &&
+  gunicorn event_menagement_project.wsgi:application    envVars:
       - key: DEBUG
         value: False
       - key: SECRET_KEY
         generateValue: true
+      - key: DJANGO_SETTINGS_MODULE
+        value: event_menagement_project.settings
+      - key: DATABASE_URL
+        value: postgresql://event_manager_db_5lic_user:O2WI01d3kBSqtRfw4ozI7HqgSX8wzKMc@dpg-d1npmejuibrs738b56jg-a/event_manager_db_5lic
