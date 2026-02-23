@@ -22,8 +22,8 @@ A Django-based web application to create, manage, and attend events. This projec
 - Python
 - Django
 - SQLite
-- HTML/CSS (Bootstrap or custom)
-- Deployment on Render (or any other free hosting)
+- HTML/CSS
+- Deployment on Render
 
 ---
 
