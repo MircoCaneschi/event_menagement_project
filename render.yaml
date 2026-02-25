@@ -15,5 +15,3 @@ services:
         generateValue: true
       - key: DJANGO_SETTINGS_MODULE
         value: event_menagement_project.settings
-      - key: DATABASE_URL
-        value: postgresql://user:password@host/dbname
